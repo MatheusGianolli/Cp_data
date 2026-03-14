@@ -12,13 +12,12 @@ def get_connection():
         dsn=os.environ.get("DB_DSN")
     )
 
-# A ROTA ABAIXO DEVE FICAR SEM ESPAÇOS NO INÍCIO
 @app.route('/dados')
 def listar_dados():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        # Busca os dados no Banco Oracle
+        # Busca os dados na tabela do Oracle
         cursor.execute("SELECT nome, setor, preco_base, estoque FROM TB_ATIVOS_GALACTICOS")
         colunas = [col[0] for col in cursor.description]
         ativos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
