@@ -12,12 +12,13 @@ def get_connection():
         dsn=os.environ.get("DB_DSN")
     )
 
-# ESTA ROTA DEVE FICAR COLADA NA MARGEM ESQUERDA
+# A ROTA ABAIXO DEVE FICAR SEM ESPAÇOS NO INÍCIO
 @app.route('/dados')
 def listar_dados():
     try:
         conn = get_connection()
         cursor = conn.cursor()
+        # Busca os dados no Banco Oracle
         cursor.execute("SELECT nome, setor, preco_base, estoque FROM TB_ATIVOS_GALACTICOS")
         colunas = [col[0] for col in cursor.description]
         ativos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
@@ -40,6 +41,7 @@ def aplicar_evento():
     try:
         conn = get_connection()
         cursor = conn.cursor()
+
         plsql_block = """
         DECLARE
             v_evento VARCHAR2(20) := :tipo;
@@ -66,6 +68,7 @@ def aplicar_evento():
             COMMIT;
         END;
         """
+        
         cursor.execute(plsql_block, tipo=evento_escolhido, setor=setor_escolhido)
         cursor.close()
         conn.close()
