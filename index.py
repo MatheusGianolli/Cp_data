@@ -4,20 +4,20 @@ from flask import Flask, request, render_template, jsonify
 
 app = Flask(__name__)
 
-# Configuração da conexão usando variáveis de ambiente (requisito do prof)
+# Configuração da conexão usando variáveis de ambiente
 def get_connection():
     return oracledb.connect(
         user=os.environ.get("DB_USER"),
         password=os.environ.get("DB_PASSWORD"),
         dsn=os.environ.get("DB_DSN")
     )
-    # Adiciona esta rota antes do final do arquivo
+
+# ESTA ROTA DEVE FICAR COLADA NA MARGEM ESQUERDA
 @app.route('/dados')
 def listar_dados():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        # Procura os dados na tua tabela
         cursor.execute("SELECT nome, setor, preco_base, estoque FROM TB_ATIVOS_GALACTICOS")
         colunas = [col[0] for col in cursor.description]
         ativos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
@@ -40,8 +40,6 @@ def aplicar_evento():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-
-        # AQUI ESTÁ O SEU CÓDIGO SQL (Adaptado com os ':' para ser dinâmico)
         plsql_block = """
         DECLARE
             v_evento VARCHAR2(20) := :tipo;
@@ -68,7 +66,6 @@ def aplicar_evento():
             COMMIT;
         END;
         """
-        
         cursor.execute(plsql_block, tipo=evento_escolhido, setor=setor_escolhido)
         cursor.close()
         conn.close()
