@@ -4,24 +4,69 @@
     <meta charset="UTF-8">
     <title>Painel do Governador Galáctico</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background-color: #0b0d17; color: white; }
-        .card { border: 1px solid #444; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; }
-        button { cursor: pointer; padding: 10px; margin: 5px; border-radius: 5px; border: none; font-weight: bold; }
-        .btn-rad { background-color: #ff4444; color: white; }
-        .btn-des { background-color: #44bb44; color: white; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #0b0d17; color: white; margin: 0; padding: 20px; }
+        h1 { color: #00d4ff; }
+        .card { border: 1px solid #444; padding: 20px; margin: 20px auto; width: 400px; border-radius: 10px; background: #161b22; }
+        
+        /* Estilo da Tabela */
+        table { margin: 30px auto; border-collapse: collapse; width: 90%; max-width: 800px; background: #161b22; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #30363d; padding: 12px; text-align: left; }
+        th { background-color: #1f6feb; color: white; }
+        tr:nth-child(even) { background-color: #0d1117; }
+        tr:hover { background-color: #21262d; }
+
+        button { cursor: pointer; padding: 10px 15px; margin: 5px; border-radius: 5px; border: none; font-weight: bold; transition: 0.3s; }
+        .btn-rad { background-color: #da3633; color: white; }
+        .btn-des { background-color: #238636; color: white; }
+        button:hover { opacity: 0.8; transform: scale(1.05); }
     </style>
 </head>
 <body>
     <h1>🚀 Mercado Galáctico</h1>
-    <p>Bem-vindo, Governador. Escolha um evento para aplicar ao setor:</p>
+    <p>Bem-vindo, Governador. Controle os ativos da colônia em tempo real.</p>
 
     <div class="card">
-        <h3>Setor: MINERAL</h3>
-        <button class="btn-rad" onclick="enviar('RADIACAO', 'MINERAL')">Radiação (+15%)</button>
-        <button class="btn-des" onclick="enviar('DESCOBERTA', 'MINERAL')">Descoberta (-15%)</button>
+        <h3>Painel de Eventos: Setor MINERAL</h3>
+        <button class="btn-rad" onclick="enviar('RADIACAO', 'MINERAL')">⚠️ Radiação (+15%)</button>
+        <button class="btn-des" onclick="enviar('DESCOBERTA', 'MINERAL')">💎 Descoberta (-15%)</button>
     </div>
 
+    <table>
+        <thead>
+            <tr>
+                <th>Ativo</th>
+                <th>Setor</th>
+                <th>Preço (Créditos)</th>
+                <th>Estoque</th>
+            </tr>
+        </thead>
+        <tbody id="corpo-tabela">
+            </tbody>
+    </table>
+
     <script>
+        // Função para buscar os dados do index.py e colocar na tabela
+        function carregarDados() {
+            fetch('/dados')
+                .then(res => res.json())
+                .then(dados => {
+                    const corpo = document.getElementById('corpo-tabela');
+                    corpo.innerHTML = ''; // Limpa a tabela antes de carregar
+                    
+                    dados.forEach(item => {
+                        const linha = `<tr>
+                            <td>${item.NOME}</td>
+                            <td>${item.SETOR}</td>
+                            <td>$ ${item.PRECO_BASE.toFixed(2)}</td>
+                            <td>${item.ESTOQUE} unidades</td>
+                        </tr>`;
+                        corpo.innerHTML += linha;
+                    });
+                })
+                .catch(err => console.error('Erro ao carregar dados:', err));
+        }
+
+        // Função para enviar o comando de UPDATE
         function enviar(evento, setor) {
             fetch('/aplicar-evento', {
                 method: 'POST',
@@ -29,9 +74,15 @@
                 body: JSON.stringify({ evento: evento, setor: setor })
             })
             .then(res => res.json())
-            .then(data => alert(data.mensagem || data.erro))
+            .then(data => {
+                alert(data.mensagem || data.erro);
+                carregarDados(); // ATUALIZA A TABELA AUTOMATICAMENTE APÓS O BOTÃO!
+            })
             .catch(err => alert('Erro: ' + err));
         }
+
+        // Carrega a tabela assim que a página abre
+        carregarDados();
     </script>
 </body>
 </html>
