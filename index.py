@@ -11,6 +11,21 @@ def get_connection():
         password=os.environ.get("DB_PASSWORD"),
         dsn=os.environ.get("DB_DSN")
     )
+    # Adiciona esta rota antes do final do arquivo
+@app.route('/dados')
+def listar_dados():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        # Procura os dados na tua tabela
+        cursor.execute("SELECT nome, setor, preco_base, estoque FROM TB_ATIVOS_GALACTICOS")
+        colunas = [col[0] for col in cursor.description]
+        ativos = [dict(zip(colunas, row)) for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return jsonify(ativos)
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
 @app.route('/')
 def index():
